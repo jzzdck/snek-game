@@ -35,6 +35,7 @@ void Game::update ( ) {
 	if (m_elapsed.asSeconds() >= 1.f/m_frametime) {
 		m_window.Update();
 		for(size_t i=0;i<m_beings.size();i++) { 
+			m_beings[i]->SetPosition(m_world);
 			m_beings[i]->Update(m_elapsed);
 		}
 		
@@ -43,10 +44,6 @@ void Game::update ( ) {
 			m_beings[Index::iSnake]->CollisionReaction(m_world);
 			m_beings[Index::iFood]->CollisionReaction(m_world);
 			collides = true;
-		}
-		
-		for(size_t i=0;i<m_beings.size();i++) {
-			m_beings[i]->SetPosition(m_world);
 		}
 		
 		m_elapsed -= sf::seconds(1.f/m_frametime);
@@ -67,9 +64,7 @@ Game::~Game ( ) {
 }
 
 void Game::clear ( ) {
-	for(size_t i=0;i<m_beings.size();i++) {
-		delete m_beings[i];
-	}
+	for(size_t i=0;i<m_beings.size();i++) delete m_beings[i];
 	
 	m_frametime = 2.f;
 	m_beings.clear();

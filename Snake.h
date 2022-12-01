@@ -19,9 +19,9 @@ public:
 private:
 	void move();
 	void grow();
-	bool collidesWithItself();
+	std::list<sf::RectangleShape>::iterator getCutStart();
 	bool has_lost;
-	int m_dir;
+	int m_dir, m_ndir;
 	std::list<sf::RectangleShape> m_model;
 };
 
