@@ -5,6 +5,7 @@
 #include "Snake.h"
 #include "World.h"
 #include "Being.h"
+#include "MessageBox.h"
 
 enum Index { iSnake = 0, iFood = 1 };
 
@@ -14,6 +15,7 @@ public:
 	~Game();
 	void Run();
 private:
+	void retrieveMessages();
 	void handleInput();
 	void update();
 	void render();
@@ -24,6 +26,7 @@ private:
 	sf::Clock m_clock;
 	sf::Time m_elapsed;
 	float m_frametime;
+	MessageBox m_messager;
 	
 	std::vector<Being*> m_beings;
 	World m_world;

@@ -4,6 +4,8 @@
 #include "Window.h"
 #include "World.h"
 #include <SFML/System/Vector2.hpp>
+#include <vector>
+#include <string>
 
 class Being {
 public:
@@ -15,6 +17,8 @@ public:
 	virtual void HandleInput() = 0;
 	virtual void CollisionReaction(World & world) = 0;
 	bool CollidesWith(const Being & another);
+	
+	std::vector<std::string> Messages;
 protected:
 	sf::Vector2u m_gridpos;
 };

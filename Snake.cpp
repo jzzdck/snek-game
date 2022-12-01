@@ -2,10 +2,12 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 Snake::Snake() :
 	m_dir(Direction::None),
-	has_lost(false) 
+	has_lost(false),
+	m_score(0)
 {
 	sf::RectangleShape head({1.f,1.f});
 	head.setFillColor(sf::Color::Green);
@@ -39,33 +41,41 @@ void Snake::grow ( ) {
 	sf::RectangleShape tail = m_model.front();
 	tail.setFillColor(sf::Color::Yellow);
 	m_model.push_back(tail);
+	std::stringstream ss;
+	ss << "You now are " << m_model.size() << " parts long.";
+	Messages.push_back(ss.str());
 }
 
 void Snake::Update (const sf::Time & elapsed) {
-	if ((m_ndir == Direction::Up && m_dir != Direction::Down)
-		|| (m_ndir == Direction::Down && m_dir != Direction::Up)
-		|| (m_ndir == Direction::Left && m_dir != Direction::Right)
-		|| (m_ndir ==Direction::Right && m_dir != Direction::Left)) 
-	{
-		m_dir = m_ndir;
-	}
+	if (has_lost) return;
 	
+	auto osize = m_model.size();
 	auto cut_start = this->getCutStart();
 	if (cut_start != m_model.end()) {
 		m_model.erase(cut_start,m_model.end());
 	}
 	this->move();
+	
+	auto nsize = m_model.size();
+	if (nsize != osize) { 
+		std::stringstream ss;
+		auto dif = osize - nsize;
+		m_score -= dif;
+		ss << "You ate " << osize-nsize << " parts of yourself...";
+		Messages.push_back(ss.str());
+	}
 }
 
 void Snake::HandleInput ( ) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-		m_ndir = Direction::Up;
-	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-		m_ndir = Direction::Down;
-	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		m_ndir = Direction::Right;
-	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		m_ndir = Direction::Left;
+	auto real_dir = this->getDirection();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && real_dir != Direction::Down) {
+		m_dir = Direction::Up;
+	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && real_dir != Direction::Up) {
+		m_dir = Direction::Down;
+	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && real_dir != Direction::Left) {
+		m_dir = Direction::Right;
+	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && real_dir != Direction::Right) {
+		m_dir = Direction::Left;
 	}
 }
 
@@ -79,8 +89,14 @@ void Snake::Setup (World & world) {
 }
 
 void Snake::SetPosition (World & world) {
+	if (has_lost) return;
+	
 	if (!world.CheckBoundaries(m_gridpos)) {
 		has_lost = true;
+		std::stringstream ss;
+		ss << "You lost!   Score: " << m_score;
+		Messages.push_back(ss.str());
+		Messages.push_back("Press R to restart...");
 	} else {
 		m_model.front().setFillColor(sf::Color::Yellow);
 		m_model.push_front(m_model.back());
@@ -91,6 +107,7 @@ void Snake::SetPosition (World & world) {
 }
 
 void Snake::CollisionReaction (World & world) {
+	m_score++;
 	this->grow();
 }
 
@@ -104,3 +121,16 @@ std::list<sf::RectangleShape>::iterator Snake::getCutStart ( ) {
 	
 	return m_model.end();
 }
+
+Direction Snake::getDirection ( ) const {
+	if (m_model.size() == 1) return Direction::None;
+	
+	auto head_pos = m_model.front().getPosition();
+	auto neck_pos = next(m_model.begin())->getPosition();
+	if (head_pos.y == neck_pos.y) {
+		return head_pos.x > neck_pos.x ? Direction::Right : Direction::Left; 
+	} else {
+		return head_pos.y > neck_pos.y ? Direction::Down : Direction::Up;
+	}
+}
+

@@ -17,11 +17,13 @@ public:
 	void HandleInput() override;
 	void CollisionReaction(World & world) override;
 private:
+	Direction getDirection() const;
 	void move();
 	void grow();
 	std::list<sf::RectangleShape>::iterator getCutStart();
 	bool has_lost;
-	int m_dir, m_ndir;
+	int m_dir;
+	int m_score;
 	std::list<sf::RectangleShape> m_model;
 };
 
