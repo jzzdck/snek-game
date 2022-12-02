@@ -25,26 +25,23 @@ void Game::handleInput ( ) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
 		this->clear();
 		this->start();
-	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-		this->clear();
-		m_window.Close();
 	}
 }
 
 void Game::update ( ) {
 	if (m_elapsed.asSeconds() >= 1.f/m_frametime) {
 		m_window.Update();
-		for(size_t i=0;i<m_beings.size();i++) { 
-			m_beings[i]->SetPosition(m_world);
-			m_beings[i]->Update(m_elapsed);
-		}
-		
 		bool collides = false;
 		if (m_beings[Index::iSnake]->CollidesWith(*m_beings[Index::iFood])) {
-			m_beings[Index::iSnake]->CollisionReaction(m_world);
 			m_beings[Index::iFood]->CollisionReaction(m_world);
+			m_beings[Index::iSnake]->CollisionReaction(m_world);
 			m_messager.Add("An apple was eaten.");
 			collides = true;
+		}
+		
+		for(size_t i=0;i<m_beings.size();i++) { 
+			m_beings[i]->Update(m_elapsed);
+			m_beings[i]->SetPosition(m_world);
 		}
 		
 		m_elapsed -= sf::seconds(1.f/m_frametime);

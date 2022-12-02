@@ -40,6 +40,8 @@ void Snake::Draw (Window & window) {
 void Snake::grow ( ) {
 	sf::RectangleShape tail = m_model.front();
 	tail.setFillColor(sf::Color::Yellow);
+	tail.setPosition({-100,-100});
+	
 	m_model.push_back(tail);
 	std::stringstream ss;
 	ss << "You now are " << m_model.size() << " parts long.";
@@ -47,27 +49,14 @@ void Snake::grow ( ) {
 }
 
 void Snake::Update (const sf::Time & elapsed) {
-	if (has_lost) return;
-	
-	auto osize = m_model.size();
-	auto cut_start = this->getCutStart();
-	if (cut_start != m_model.end()) {
-		m_model.erase(cut_start,m_model.end());
-	}
+	if (has_lost) return;	
+	this->checkIfCutsItself();
 	this->move();
-	
-	auto nsize = m_model.size();
-	if (nsize != osize) { 
-		std::stringstream ss;
-		auto dif = osize - nsize;
-		m_score -= dif;
-		ss << "You ate " << osize-nsize << " parts of yourself...";
-		Messages.push_back(ss.str());
-	}
 }
 
 void Snake::HandleInput ( ) {
 	auto real_dir = this->getDirection();
+	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && real_dir != Direction::Down) {
 		m_dir = Direction::Up;
 	} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && real_dir != Direction::Up) {
@@ -107,7 +96,7 @@ void Snake::SetPosition (World & world) {
 }
 
 void Snake::CollisionReaction (World & world) {
-	m_score++;
+	++m_score;
 	this->grow();
 }
 
@@ -131,6 +120,23 @@ Direction Snake::getDirection ( ) const {
 		return head_pos.x > neck_pos.x ? Direction::Right : Direction::Left; 
 	} else {
 		return head_pos.y > neck_pos.y ? Direction::Down : Direction::Up;
+	}
+}
+
+void Snake::checkIfCutsItself ( ) {
+	auto osize = m_model.size();
+	auto cut_start = this->getCutStart();
+	if (cut_start != m_model.end()) {
+		m_model.erase(cut_start,m_model.end());
+	}
+	
+	auto nsize = m_model.size();
+	if (nsize != osize) { 
+		std::stringstream ss;
+		auto dif = osize - nsize;
+		m_score -= dif;
+		ss << "You ate " << osize-nsize << " parts of yourself...";
+		Messages.push_back(ss.str());
 	}
 }
 

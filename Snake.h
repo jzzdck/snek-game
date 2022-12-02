@@ -5,7 +5,7 @@
 #include "Being.h"
 #include <list>
 
-enum Direction { None, Right, Left, Up, Down };
+enum Direction { None=0, Right=1, Left=2, Up=3, Down=4 };
 
 class Snake : public Being {
 public:
@@ -20,6 +20,7 @@ private:
 	Direction getDirection() const;
 	void move();
 	void grow();
+	void checkIfCutsItself();
 	std::list<sf::RectangleShape>::iterator getCutStart();
 	bool has_lost;
 	int m_dir;
